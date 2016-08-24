@@ -11,7 +11,7 @@ var creep_count_generic     = 0;
 var creep_count_harvester   = 1;
 var creep_count_builder     = 1;
 var creep_count_repairer    = 0;
-var creep_count_upgrader    = 1;
+var creep_count_upgrader    = 9;
 var creep_count_attacker    = 0;
 
 module.exports.loop = function () {
