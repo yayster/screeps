@@ -1,13 +1,4 @@
-/*
- * Module code goes here. Use 'module.exports' to export things:
- * module.exports.thing = 'a thing';
- *
- * You can import it from another modules like this:
- * var mod = require('role.harvester'); 
- * mod.thing == 'a thing'; // true
- */
-var roleBuilder = require('role.builder');
-var roleHarvester = {
+var taskRefresh = {
 
   /** @param {Creep} creep **/
   run: function(creep) {
@@ -22,4 +13,4 @@ var roleHarvester = {
   }
 };
 
-module.exports = roleHarvester;
+module.exports = taskRefresh;
