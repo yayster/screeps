@@ -1,16 +1,20 @@
 var basicTasks = require('basic.tasks');
+var spawnWorker = require('spawn.worker');
 //var creepManagement = require('creep.management');
 var taskRefresh = require('task.refresh');
+var taskRefuel = require('task.refuel');
 var taskHarvest = require('task.harvest');
 var taskUpgrade = require('task.upgrade');
 
 
-const desired_workers = 5;
+const desired_workers = 9;
+const desired_grunts  = 8;
 
 module.exports.loop = function () {
   console.log('----- Begin Game Tick -----');
-  console.log('CPU used: ' + Game.cpu.getUsed());
-  console.log('GCL:      ' + Game.gcl.level + ' ' + Game.gcl.progress);
+  console.log('CPU used  : ' + Game.cpu.getUsed());
+  console.log('Game.time : ' + Game.time);
+  console.log('GCL       : ' + Game.gcl.level + ' ' + Game.gcl.progress);
 
   var result = basicTasks.cleanUpMemory();
   console.log('CPU used: ' + Game.cpu.getUsed());
@@ -34,10 +38,11 @@ module.exports.loop = function () {
         console.log('Energy Available: ' + room.energyAvailable);
         if( Object.keys(creepWorkers).length < desired_workers ) {
           console.log('  trying to spawn another worker.');
-          spawn.createCreep([MOVE,MOVE,WORK,CARRY,CARRY],
-            undefined,
-            {role: 'worker', task:'harvest'}
-          );
+          if( Object.keys(creepWorkers).length == 0 ) {
+            spawnWorker.run(spawn, 'harvest'); 
+          } else {
+            spawnWorker.run(spawn, 'upgrade');
+          }
         }
         console.log('Energy Available: ' + room.energyAvailable);
         console.log('CPU used: ' + Game.cpu.getUsed());
@@ -53,8 +58,10 @@ module.exports.loop = function () {
     console.log('    life: ' + creep.ticksToLive);
     console.log('   alive: ' + creep.memory.ticks_alive);
     creep.memory.ticks_alive++;
-    if(creep.ticksToLive <= 135 || creep.memory.refresh == 'true' )  {
+    if(creep.ticksToLive <= 135 || creep.memory.refresh == 'true')  {
       taskRefresh.run(creep);  
+    } else if(creep.carry.energy == 0 || creep.memory.refuel == 'true') {
+      taskRefuel.run(creep);
     } else if(creep.memory.task == 'harvest') {
       taskHarvest.run(creep);
     } else if(creep.memory.task == 'upgrade') {
