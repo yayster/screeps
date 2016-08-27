@@ -1,13 +1,15 @@
-var basicTasks = require('basic.tasks');
+var basicTasks  = require('basic.tasks');
 var spawnWorker = require('spawn.worker');
+var spawnTruck  = require('spawn.truck');
 //var creepManagement = require('creep.management');
 var taskRefresh = require('task.refresh');
-var taskRefuel = require('task.refuel');
+var taskRefuel  = require('task.refuel');
 var taskHarvest = require('task.harvest');
 var taskUpgrade = require('task.upgrade');
-
+var taskHaul    = require('task.haul');
 
 const desired_workers = 9;
+const desired_trucks  = 0;
 const desired_grunts  = 8;
 
 module.exports.loop = function () {
@@ -23,7 +25,9 @@ module.exports.loop = function () {
   var creepWorkers = _.filter(Game.creeps,
     (creep) => creep.memory.role == 'worker');
   console.log('     workers: ' + Object.keys(creepWorkers).length);
-
+  var creepTrucks = _.filter(Game.creeps,
+    (creep) => creep.memory.role == 'truck');
+  console.log('      trucks: ' + Object.keys(creepTrucks).length);
   for(var room_name in Game.rooms) {
     console.log('Examining ' + room_name + ':');
     var room = Game.rooms[room_name];
@@ -43,6 +47,9 @@ module.exports.loop = function () {
           } else {
             spawnWorker.run(spawn, 'upgrade');
           }
+        } else if( Object.keys(creepTrucks).length < desired_trucks ) {
+          console.log('  trying to spawn another truck.');
+          spawnTruck.run(spawn, 'haul');
         }
         console.log('Energy Available: ' + room.energyAvailable);
         console.log('CPU used: ' + Game.cpu.getUsed());
@@ -53,19 +60,22 @@ module.exports.loop = function () {
   console.log('CPU used: ' + Game.cpu.getUsed());
 
   for(var name in Game.creeps) {
-    console.log('Directing ' + name + ':');
+//    console.log('Directing ' + name + ':');
     var creep = Game.creeps[name];
-    console.log('    life: ' + creep.ticksToLive);
-    console.log('   alive: ' + creep.memory.ticks_alive);
-    creep.memory.ticks_alive++;
+//    console.log('    life: ' + creep.ticksToLive);
+//    console.log('   alive: ' + creep.memory.ticks_alive);
+//    creep.memory.ticks_alive++;
     if(creep.ticksToLive <= 135 || creep.memory.refresh == 'true')  {
       taskRefresh.run(creep);  
-    } else if(creep.carry.energy == 0 || creep.memory.refuel == 'true') {
+    } else if((creep.carry.energy == 0 || creep.memory.refuel == 'true')
+      && creep.memory.role == 'worker' ) {
       taskRefuel.run(creep);
     } else if(creep.memory.task == 'harvest') {
       taskHarvest.run(creep);
     } else if(creep.memory.task == 'upgrade') {
       taskUpgrade.run(creep);
+    } else if(creep.memory.task == 'haul') {
+      taskHaul.run(creep);
     }
   }
   console.log('CPU used: ' + Game.cpu.getUsed());
