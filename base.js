@@ -1,5 +1,5 @@
 module.exports = {
-  list_rooms: function() {
+  run: function() {
     return 'OK';
   }
 }
