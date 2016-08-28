@@ -14,7 +14,7 @@ var taskHarvest = {
       }
     } else {
       creep.say('~');
-      creep.moveTo(34,21);
+      creep.moveTo(18,22);
     }
   }
 };
