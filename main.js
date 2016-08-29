@@ -14,7 +14,11 @@ module.exports.loop = function () {
   // Loop through the rooms.
   for(var room_name in Game.rooms) {
     var room = Game.rooms[room_name];
-
+    if(room.memory.gameStart == undefined) {
+      room.memory.gameStart = Game.time;
+    }
+    room.memory.gameTime = Game.time - room.memory.gameStart;
+    room.memory.spawnAttempt = 0;
     // spawn
     if( room.memory.spawnId == undefined ) {
       for(var spawn_name in Game.spawns) {
@@ -35,39 +39,59 @@ module.exports.loop = function () {
     if( spawn.memory.initialized == undefined || 0 ){
       console.log('spawn initializing');
       if(spawn.memory.desiredWorkers == undefined) {
-        spawn.memory.desiredWorkers = 1;
+        spawn.memory.desiredWorkers = 2;
       }
       if(spawn.memory.workers == undefined) {
         spawn.memory.workers = [];
       }
       spawn.memory.initialized = 1;
     }
-    if(spawn.memory.workers.length < spawn.memory.desiredWorkers &&
-       room.energyAvailable >= 300) {
-      spawn.memory.workers.push(spawnWorker.run(spawn,undefined,'harvest'));
-    }       
+    if(spawn.memory.workers.length < spawn.memory.desiredWorkers) {
+      if((room.energyAvailable >= 300) 
+        && ((room.memory.spawnAttempt == 0) || (spawn.spawning))) {
+        console.log('trying to spawn a worker for the spawn');
+        spawn.memory.workers.push(spawnWorker.run(spawn,undefined,'harvest'));
+        room.memory.spawnAttempt = 1;
+      } else {
+//        console.log('not enough energy to spawn a work for the spawn');
+      }
+    } else {
+    }      
 
     // controller
     var controller = room.controller;
     if(controller.my) {
+      if(room.memory.gameTime % 1000 == 0) {
+        room.memory['stat_at_'+room.memory.gameTime] =
+          controller.progress / room.memory.gameTime;
+        console.log('stat at ' +
+          room.memory.gameTime + ' ' + 
+          room.memory['stat_at_'+room.memory.gameTime]);
+      }
       if(room.memory.controllerInitialized == undefined || 0){
         console.log('room controller initializing');
         if(room.memory.controllerDesiredWorkers == undefined) {
-          room.memory.controllerDesiredWorkers = 2;
+          room.memory.controllerDesiredWorkers = 4;
         }
         if(room.memory.controllerWorkers == undefined) {
           room.memory.controllerWorkers =[];
         }
         room.memory.controllerInitialized =1;
       }      
-      if(room.memory.controllerWorkers.length 
-          <  room.memory.controllerDesiredWorkers 
-          && room.energyAvailable >= 300) {
-        room.memory.controllerWorkers.push(
-          spawnWorker.run(spawn,undefined,'upgrade')
-        );
+      if(room.memory.controllerWorkers.length
+        < room.memory.controllerDesiredWorkers ) { 
+        if((room.energyAvailable >= 300) 
+          && ((room.memory.spawnAttempt == 0) || (spawn.spawning))) {
+          console.log('trying to spawn worker for the controller');
+          room.memory.controllerWorkers.push(
+            spawnWorker.run(spawn,undefined,'upgrade')
+          );
+          room.memory.spawnAttempt = 1;
+        } else {
+//          console.log('not enough energy for the controller worker spawn');
+        }
+      } else {
       }
-          
       if(room.memory.controllerContainerId == undefined) {
         console.log('There is no container for the controller');
         controllerContainer.run(controller);
@@ -76,6 +100,12 @@ module.exports.loop = function () {
     } else {
       console.log('This controller is not mine.');
     }
+
+    //sources
+    //
+    if( room.memory.sources == undefined) {
+      room.memory.sources = room.find(FIND_SOURCES);
+    } 
 
   }
 

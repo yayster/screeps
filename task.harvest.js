@@ -14,7 +14,26 @@ var taskHarvest = {
       }
     } else {
       creep.say('~');
-      creep.moveTo(18,22);
+      var target = creep.pos.findClosestByRange(FIND_MY_CONSTRUCTION_SITES,
+        {filter: { structureType: STRUCTURE_ROAD }});
+      if(target) {
+        if(creep.build(target) == ERR_NOT_IN_RANGE) {
+          creep.moveTo(target);
+        }
+      } else {
+        var targets = creep.room.find(FIND_STRUCTURES, {
+          filter: function(object) {
+            return object.structureType == STRUCTURE_ROAD && 
+              (object.hits < object.hitsMax)}});
+        if(targets) {
+          console.log(targets.length);
+          if(creep.repair(targets[0]) == ERR_NOT_IN_RANGE) {
+            creep.moveTo(targets[0])
+          }
+        } else {
+          creep.moveTo(25,26);
+        }
+      }
     }
   }
 };

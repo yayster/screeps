@@ -7,7 +7,7 @@ var taskRefresh = {
       (spawn) => spawn.room.name == creep.room.name);
     if(room_spawn[0].renewCreep(creep) == ERR_NOT_IN_RANGE) {
       creep.moveTo(room_spawn[0]);
-      creep.say('Help!');
+      creep.say('Help! '+creep.ticksToLive);
     } else {
       creep.transfer(room_spawn[0], RESOURCE_ENERGY);
     }
