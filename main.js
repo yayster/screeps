@@ -109,6 +109,24 @@ module.exports.loop = function () {
 
   }
 
+      
+  var tower = Game.getObjectById('57c4deacae15ba1b6d4cedda');
+  if(tower) {
+    var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+    if(closestHostile) {
+      tower.attack(closestHostile);
+    }
+/*
+    var closestDamagedStructure = 
+      tower.pos.findClosestByRange(FIND_STRUCTURES, {
+        filter: (structure) => structure.hits < structure.hitsMax
+      });
+    if(closestDamagedStructure) {
+      tower.repair(closestDamagedStructure);
+    }
+*/
+  }
+
   for(var name in Game.creeps) {
     var creep = Game.creeps[name];
     if(creep.ticksToLive <= 135 || creep.memory.refresh == 'true')  {
