@@ -1,6 +1,5 @@
 var controllerContainer  = {
   run: function(controller) {
-    console.log('hi there');
     if(controller.room.memory.controllerSourceId == undefined) {
       var nearest_source = controller.pos.findClosestByPath(FIND_SOURCES, {});
       controller.room.memory.controllerSourceId = nearest_source.id;
@@ -78,7 +77,6 @@ for(var x = controller.pos.x - 3; x <= controller.pos.x; x++) {
       var y = controller.room.memory.controllerContainer_tempY;
       var found = controller.room.lookForAt( LOOK_CONSTRUCTION_SITES, x, y);
       if(found) {
-        console.log('found');
         for(var thing in found){
           if(found[thing].structureType == STRUCTURE_CONTAINER) {
             controller.room.memory.controllerContainerId = found[thing].id;
@@ -91,7 +89,6 @@ for(var x = controller.pos.x - 3; x <= controller.pos.x; x++) {
         delete controller.room.memory.controllerContainer_tempX;
         delete controller.room.memory.controllerContainer_tempY;
       } else {
-        console.log('not found');
       }
     }
     return 'OK';

@@ -3,7 +3,7 @@ var missionRefueling = {
     creep.memory.refuel = 'true';
     if( creep.memory.preferredSourceId == undefined ) {
       var target = creep.pos.findClosestByPath(FIND_SOURCES, {});
-      creep.memory.perferredSourceId = target.id;
+      if(target) { creep.memory.perferredSourceId = target.id; }
     } else {
       var target = Game.getObjectById( creep.memory.preferredSourceId );
     }
