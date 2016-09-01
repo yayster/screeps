@@ -1,11 +1,13 @@
 var basicTasks  = require('basic.tasks');
 var spawnWorker = require('spawn.worker');
 var spawnTruck  = require('spawn.truck');
+var spawnMiner  = require('spawn.miner');
 var taskRefresh = require('task.refresh');
 var taskRefuel  = require('task.refuel');
 var taskHarvest = require('task.harvest');
 var taskUpgrade = require('task.upgrade');
 var taskHaul    = require('task.haul');
+var taskMine    = require('task.mine');
 var controllerContainer = require('controller.container');
 
 module.exports.loop = function () {
@@ -44,6 +46,12 @@ module.exports.loop = function () {
       if(spawn.memory.workers == undefined) {
         spawn.memory.workers = [];
       }
+      if(spawn.memory.desiredMiners == undefined) {
+        spawn.memory.desiredMiners = 2;
+      }
+      if(spawn.memory.miners == undefined) {
+        spawn.memory.miners = [];
+      }
       spawn.memory.initialized = 1;
     }
     if(spawn.memory.workers.length < spawn.memory.desiredWorkers) {
@@ -55,8 +63,14 @@ module.exports.loop = function () {
       } else {
 //        console.log('not enough energy to spawn a work for the spawn');
       }
-    } else {
-    }      
+    } else if(spawn.memory.miners.length < spawn.memory.desiredMiners) {
+      if((room.energyAvailable >= 300)
+        && ((room.memory.spawnAttempt == 0) || (spawn.spawning))) {
+        console.log('trying to spawn a miner for the spawn');
+        spawn.memory.miners.push(spawnMiner.run(spawn,undefined,'mine'));
+        room.memory.spawnAttempt = 1;
+      }
+    } 
 
     // controller
     var controller = room.controller;
@@ -140,6 +154,8 @@ module.exports.loop = function () {
       taskUpgrade.run(creep);
     } else if(creep.memory.task == 'haul') {
       taskHaul.run(creep);
+    } else if(creep.memory.task == 'mine') {
+      taskMine.run(creep);
     }
   }
 }
